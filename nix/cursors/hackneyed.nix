@@ -21,10 +21,13 @@ let
         pkgs.inkscape
         pkgs.xorg.xcursorgen
         pkgs.jq
+        pkgs.fontconfig
       ];
 
       buildPhase = ''
         export HOME=$(mktemp -d)
+        export FONTCONFIG_FILE="${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
+        patchShebangs .
         make theme \
           INKSCAPE="${pkgs.inkscape}/bin/inkscape" \
           XCURSORGEN="${pkgs.xorg.xcursorgen}/bin/xcursorgen" \
