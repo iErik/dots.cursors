@@ -1,7 +1,7 @@
 self: { config, lib, pkgs, ... }:
 
 let
-  cfg = config.cursors;
+  cfg = config.dots.cursors;
 
   # Import per-cursor package definitions
   bibataRainbow  = import ./cursors/bibata-rainbow.nix  pkgs lib;
@@ -150,7 +150,7 @@ let
 
 in
 {
-  options.cursors = {
+  options.dots.cursors = {
 
     enable = lib.mkEnableOption "all cursor packages defined in this flake";
 
@@ -261,17 +261,17 @@ in
 
     # ── Cascade master enable → all per-cursor enables (low priority) ─────────
     {
-      cursors.bibataRainbow.enable  = lib.mkDefault cfg.enable;
-      cursors.bibata.enable         = lib.mkDefault cfg.enable;
-      cursors.bibataExtra.enable    = lib.mkDefault cfg.enable;
-      cursors.layan.enable          = lib.mkDefault cfg.enable;
-      cursors.capitaine.enable      = lib.mkDefault cfg.enable;
-      cursors.deepinWhite.enable    = lib.mkDefault cfg.enable;
-      cursors.deepinDark.enable     = lib.mkDefault cfg.enable;
-      cursors.sunset.enable         = lib.mkDefault cfg.enable;
-      cursors.plasmaOverdose.enable = lib.mkDefault cfg.enable;
-      cursors.hackneyed.enable      = lib.mkDefault cfg.enable;
-      cursors.xcursorPro.enable     = lib.mkDefault cfg.enable;
+      dots.cursors.bibataRainbow.enable  = lib.mkDefault cfg.enable;
+      dots.cursors.bibata.enable         = lib.mkDefault cfg.enable;
+      dots.cursors.bibataExtra.enable    = lib.mkDefault cfg.enable;
+      dots.cursors.layan.enable          = lib.mkDefault cfg.enable;
+      dots.cursors.capitaine.enable      = lib.mkDefault cfg.enable;
+      dots.cursors.deepinWhite.enable    = lib.mkDefault cfg.enable;
+      dots.cursors.deepinDark.enable     = lib.mkDefault cfg.enable;
+      dots.cursors.sunset.enable         = lib.mkDefault cfg.enable;
+      dots.cursors.plasmaOverdose.enable = lib.mkDefault cfg.enable;
+      dots.cursors.hackneyed.enable      = lib.mkDefault cfg.enable;
+      dots.cursors.xcursorPro.enable     = lib.mkDefault cfg.enable;
     }
 
     # ── Per-cursor install conditions ─────────────────────────────────────────
