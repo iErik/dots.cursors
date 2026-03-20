@@ -144,7 +144,16 @@ let
   };
 
   # Helper: shared option definitions
-  mkEnableOpt  = desc:     lib.mkOption { type = lib.types.bool; default = false; description = desc; };
+  # null  = follow the master dots.cursors.enable switch
+  # true  = always install this cursor
+  # false = never install this cursor (even when master enable is true)
+  mkEnableOpt  = desc: lib.mkOption {
+    type        = lib.types.nullOr lib.types.bool;
+    default     = null;
+    description = "${desc} null = follow master enable, true = always install, false = never install.";
+  };
+  # Returns true when a cursor should be installed given its per-cursor flag and the master flag.
+  on = cursorEnable: cursorEnable == true || (cursorEnable == null && cfg.enable);
   mkVariantOpt = vs: d:    lib.mkOption { type = lib.types.enum vs; default = d; description = "Cursor variant."; };
   mkSizeOpt    =           lib.mkOption { type = lib.types.int; default = 24; description = "Cursor size in pixels."; };
 
@@ -259,63 +268,48 @@ in
 
   config = lib.mkMerge [
 
-    # ── Cascade master enable → all per-cursor enables (low priority) ─────────
-    {
-      dots.cursors.bibataRainbow.enable  = lib.mkDefault cfg.enable;
-      dots.cursors.bibata.enable         = lib.mkDefault cfg.enable;
-      dots.cursors.bibataExtra.enable    = lib.mkDefault cfg.enable;
-      dots.cursors.layan.enable          = lib.mkDefault cfg.enable;
-      dots.cursors.capitaine.enable      = lib.mkDefault cfg.enable;
-      dots.cursors.deepinWhite.enable    = lib.mkDefault cfg.enable;
-      dots.cursors.deepinDark.enable     = lib.mkDefault cfg.enable;
-      dots.cursors.sunset.enable         = lib.mkDefault cfg.enable;
-      dots.cursors.plasmaOverdose.enable = lib.mkDefault cfg.enable;
-      dots.cursors.hackneyed.enable      = lib.mkDefault cfg.enable;
-      dots.cursors.xcursorPro.enable     = lib.mkDefault cfg.enable;
-    }
-
     # ── Per-cursor install conditions ─────────────────────────────────────────
-    (lib.mkIf (cfgBR.enable || cfg.pointerCursor == "bibataRainbow") {
+    (lib.mkIf (on cfgBR.enable || cfg.pointerCursor == "bibataRainbow") {
       home.packages = [ bibataRainbow.packages.${cfgBR.variant} ];
     })
 
-    (lib.mkIf (cfgB.enable || cfg.pointerCursor == "bibata") {
+    (lib.mkIf (on cfgB.enable || cfg.pointerCursor == "bibata") {
       home.packages = [ bibata.packages.${cfgB.variant} ];
     })
 
-    (lib.mkIf (cfgBE.enable || cfg.pointerCursor == "bibataExtra") {
+    (lib.mkIf (on cfgBE.enable || cfg.pointerCursor == "bibataExtra") {
       home.packages = [ bibataExtra.packages.${cfgBE.variant} ];
     })
 
-    (lib.mkIf (cfgL.enable || cfg.pointerCursor == "layan") {
+    (lib.mkIf (on cfgL.enable || cfg.pointerCursor == "layan") {
       home.packages = [ layan.packages.${cfgL.variant} ];
     })
 
-    (lib.mkIf (cfgC.enable || cfg.pointerCursor == "capitaine") {
+    (lib.mkIf (on cfgC.enable || cfg.pointerCursor == "capitaine") {
       home.packages = [ capitaine.package ];
     })
 
-    (lib.mkIf (cfgDW.enable || cfg.pointerCursor == "deepinWhite") {
+    (lib.mkIf (on cfgDW.enable || cfg.pointerCursor == "deepinWhite") {
       home.packages = [ deepin.white ];
     })
 
-    (lib.mkIf (cfgDD.enable || cfg.pointerCursor == "deepinDark") {
+    (lib.mkIf (on cfgDD.enable || cfg.pointerCursor == "deepinDark") {
       home.packages = [ deepin.dark ];
     })
 
-    (lib.mkIf (cfgS.enable || cfg.pointerCursor == "sunset") {
+    (lib.mkIf (on cfgS.enable || cfg.pointerCursor == "sunset") {
       home.packages = [ sunset.package ];
     })
 
-    (lib.mkIf (cfgPO.enable || cfg.pointerCursor == "plasmaOverdose") {
+    (lib.mkIf (on cfgPO.enable || cfg.pointerCursor == "plasmaOverdose") {
       home.packages = [ plasmaOverdose.package ];
     })
 
-    (lib.mkIf (cfgH.enable || cfg.pointerCursor == "hackneyed") {
+    (lib.mkIf (on cfgH.enable || cfg.pointerCursor == "hackneyed") {
       home.packages = [ hackneyed.packages.${cfgH.variant} ];
     })
 
-    (lib.mkIf (cfgXP.enable || cfg.pointerCursor == "xcursorPro") {
+    (lib.mkIf (on cfgXP.enable || cfg.pointerCursor == "xcursorPro") {
       home.packages = [ xcursorPro.packages.${cfgXP.variant} ];
     })
 
