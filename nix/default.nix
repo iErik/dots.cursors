@@ -29,9 +29,11 @@ let
   cfgXP  = cfg.xcursorPro;
 
   # Registry: one entry per pointerCursor ID.
-  # Each entry is evaluated lazily — only the selected cursor is forced.
+  # Each entry is evaluated lazily — only the selected
+  # cursor is forced.
   cursorRegistry = {
     bibataRainbow = {
+      enable  = cfgBR.enable;
       package = bibataRainbow.packages.${cfgBR.variant};
       pointerCursor = {
         package    = bibataRainbow.packages.${cfgBR.variant};
@@ -42,6 +44,7 @@ let
       };
     };
     bibata = {
+      enable  = cfgB.enable;
       package = bibata.packages.${cfgB.variant};
       pointerCursor = {
         package    = bibata.packages.${cfgB.variant};
@@ -52,6 +55,7 @@ let
       };
     };
     bibataExtra = {
+      enable  = cfgBE.enable;
       package = bibataExtra.packages.${cfgBE.variant};
       pointerCursor = {
         package    = bibataExtra.packages.${cfgBE.variant};
@@ -62,6 +66,7 @@ let
       };
     };
     layan = {
+      enable  = cfgL.enable;
       package = layan.packages.${cfgL.variant};
       pointerCursor = {
         package    = layan.packages.${cfgL.variant};
@@ -72,6 +77,7 @@ let
       };
     };
     capitaine = {
+      enable  = cfgC.enable;
       package = capitaine.package;
       pointerCursor = {
         package    = capitaine.package;
@@ -82,6 +88,7 @@ let
       };
     };
     deepinWhite = {
+      enable  = cfgDW.enable;
       package = deepin.white;
       pointerCursor = {
         package    = deepin.white;
@@ -92,6 +99,7 @@ let
       };
     };
     deepinDark = {
+      enable  = cfgDD.enable;
       package = deepin.dark;
       pointerCursor = {
         package    = deepin.dark;
@@ -102,6 +110,7 @@ let
       };
     };
     sunset = {
+      enable  = cfgS.enable;
       package = sunset.package;
       pointerCursor = {
         package    = sunset.package;
@@ -112,6 +121,7 @@ let
       };
     };
     plasmaOverdose = {
+      enable  = cfgPO.enable;
       package = plasmaOverdose.package;
       pointerCursor = {
         package    = plasmaOverdose.package;
@@ -122,6 +132,7 @@ let
       };
     };
     hackneyed = {
+      enable  = cfgH.enable;
       package = hackneyed.packages.${cfgH.variant};
       pointerCursor = {
         package    = hackneyed.packages.${cfgH.variant};
@@ -132,6 +143,7 @@ let
       };
     };
     xcursorPro = {
+      enable  = cfgXP.enable;
       package = xcursorPro.packages.${cfgXP.variant};
       pointerCursor = {
         package    = xcursorPro.packages.${cfgXP.variant};
@@ -146,16 +158,41 @@ let
   # Helper: shared option definitions
   # null  = follow the master dots.cursors.enable switch
   # true  = always install this cursor
-  # false = never install this cursor (even when master enable is true)
+  # false = never install this cursor (even when master
+  # enable is true)
   mkEnableOpt  = desc: lib.mkOption {
     type        = lib.types.nullOr lib.types.bool;
     default     = null;
-    description = "${desc} null = follow master enable, true = always install, false = never install.";
+    description =
+      "${desc} null = follow master enable, true = always" +
+      "install, false = never install.";
   };
-  # Returns true when a cursor should be installed given its per-cursor flag and the master flag.
-  on = cursorEnable: cursorEnable == true || (cursorEnable == null && cfg.enable);
-  mkVariantOpt = vs: d:    lib.mkOption { type = lib.types.enum vs; default = d; description = "Cursor variant."; };
-  mkSizeOpt    =           lib.mkOption { type = lib.types.int; default = 24; description = "Cursor size in pixels."; };
+
+  # Returns true when a cursor should be installed given
+  # its per-cursor flag and the master flag.
+  on = cursorEnable:
+    cursorEnable == true ||
+    (cursorEnable == null && cfg.enable);
+
+  mkVariantOpt = vs: d: lib.mkOption {
+    type = lib.types.enum vs;
+    default = d;
+    description = "Cursor variant.";
+  };
+
+  mkSizeOpt = lib.mkOption {
+    type = lib.types.int;
+    default = 24;
+    description = "Cursor size in pixels.";
+  };
+
+  # Produce a mkIf fragment that installs a cursor package when it
+  # should be active (enabled or selected as pointerCursor).
+  installIfEnabled = name:
+    let r = cursorRegistry.${name};
+    in lib.mkIf (on r.enable || cfg.pointerCursor == name) {
+      home.packages = [ r.package ];
+    };
 
 in
 {
@@ -180,19 +217,20 @@ in
       default     = null;
       description = ''
         ID of the cursor to configure as home.pointerCursor.
-        The named cursor is installed even if its enable flag is false.
-        When null, home.pointerCursor is left unconfigured.
+        The named cursor is installed even if its enable
+        flag is false. When null, home.pointerCursor is
+        left unconfigured.
       '';
     };
 
-    # ── Bibata Rainbow ────────────────────────────────────────────────────────
+    # ── Bibata Rainbow ───────────────────────────────────
     bibataRainbow = {
       enable  = mkEnableOpt "Install Bibata Rainbow cursor.";
       variant = mkVariantOpt [ "modern" "original" ] "modern";
       size    = mkSizeOpt;
     };
 
-    # ── Bibata ────────────────────────────────────────────────────────────────
+    # ── Bibata ───────────────────────────────────────────
     bibata = {
       enable  = mkEnableOpt "Install Bibata cursor.";
       variant = mkVariantOpt [
@@ -202,121 +240,99 @@ in
       size = mkSizeOpt;
     };
 
-    # ── Bibata Extra ──────────────────────────────────────────────────────────
+    # ── Bibata Extra ─────────────────────────────────────
     bibataExtra = {
       enable  = mkEnableOpt "Install Bibata Extra cursor.";
       variant = mkVariantOpt [
-        "modern-darkRed" "modern-dodgerBlue" "modern-pink" "modern-turquoise"
-        "original-darkRed" "original-dodgerBlue" "original-pink" "original-turquoise"
+        "modern-darkRed"
+        "modern-dodgerBlue"
+        "modern-pink"
+        "modern-turquoise"
+        "original-darkRed"
+        "original-dodgerBlue"
+        "original-pink"
+        "original-turquoise"
       ] "modern-pink";
       size = mkSizeOpt;
     };
 
-    # ── Layan ─────────────────────────────────────────────────────────────────
+    # ── Layan ────────────────────────────────────────────
     layan = {
       enable  = mkEnableOpt "Install Layan cursor.";
-      variant = mkVariantOpt [ "standard" "border" "white" ] "standard";
+      variant = mkVariantOpt [
+        "standard"
+        "border"
+        "white"
+      ] "standard";
       size    = mkSizeOpt;
     };
 
-    # ── Capitaine ─────────────────────────────────────────────────────────────
+    # ── Capitaine ────────────────────────────────────────
     capitaine = {
       enable  = mkEnableOpt "Install Capitaine cursor (via pkgs.capitaine-cursors).";
       variant = mkVariantOpt [ "dark" "white" ] "dark";
       size    = mkSizeOpt;
     };
 
-    # ── DeepinV20 White ───────────────────────────────────────────────────────
+    # ── DeepinV20 White ──────────────────────────────────
     deepinWhite = {
       enable = mkEnableOpt "Install DeepinV20 White cursor.";
       size   = mkSizeOpt;
     };
 
-    # ── DeepinV20 Dark ────────────────────────────────────────────────────────
+    # ── DeepinV20 Dark ───────────────────────────────────
     deepinDark = {
       enable = mkEnableOpt "Install DeepinV20 Dark cursor.";
       size   = mkSizeOpt;
     };
 
-    # ── Sunset ────────────────────────────────────────────────────────────────
+    # ── Sunset ───────────────────────────────────────────
     sunset = {
       enable = mkEnableOpt "Install Sunset cursor.";
       size   = mkSizeOpt;
     };
 
-    # ── Plasma Overdose ───────────────────────────────────────────────────────
+    # ── Plasma Overdose ──────────────────────────────────
     plasmaOverdose = {
       enable = mkEnableOpt "Install Plasma Overdose cursor.";
       size   = mkSizeOpt;
     };
 
-    # ── Hackneyed ─────────────────────────────────────────────────────────────
+    # ── Hackneyed ────────────────────────────────────────
     hackneyed = {
       enable  = mkEnableOpt "Install Hackneyed cursor (built from source).";
-      variant = mkVariantOpt [ "light" "dark" ] "light";
+      variant = mkVariantOpt [ "light" "dark" ] "dark";
       size    = mkSizeOpt;
     };
 
-    # ── XCursor Pro ───────────────────────────────────────────────────────────
+    # ── XCursor Pro ──────────────────────────────────────
     xcursorPro = {
       enable  = mkEnableOpt "Install XCursor Pro cursor.";
-      variant = mkVariantOpt [ "dark" "light" "red" ] "dark";
+      variant = mkVariantOpt [
+        "dark"
+        "light"
+        "red"
+      ] "dark";
       size    = mkSizeOpt;
     };
-
   };
 
-  config = lib.mkMerge [
+  config = lib.mkMerge (
+    # ── Per-cursor install conditions ────────────────────
+    map installIfEnabled [
+      "bibataRainbow" "bibata" "bibataExtra" "layan"
+      "capitaine" "deepinWhite" "deepinDark" "sunset"
+      "plasmaOverdose" "hackneyed" "xcursorPro"
+    ] ++ [
 
-    # ── Per-cursor install conditions ─────────────────────────────────────────
-    (lib.mkIf (on cfgBR.enable || cfg.pointerCursor == "bibataRainbow") {
-      home.packages = [ bibataRainbow.packages.${cfgBR.variant} ];
-    })
-
-    (lib.mkIf (on cfgB.enable || cfg.pointerCursor == "bibata") {
-      home.packages = [ bibata.packages.${cfgB.variant} ];
-    })
-
-    (lib.mkIf (on cfgBE.enable || cfg.pointerCursor == "bibataExtra") {
-      home.packages = [ bibataExtra.packages.${cfgBE.variant} ];
-    })
-
-    (lib.mkIf (on cfgL.enable || cfg.pointerCursor == "layan") {
-      home.packages = [ layan.packages.${cfgL.variant} ];
-    })
-
-    (lib.mkIf (on cfgC.enable || cfg.pointerCursor == "capitaine") {
-      home.packages = [ capitaine.package ];
-    })
-
-    (lib.mkIf (on cfgDW.enable || cfg.pointerCursor == "deepinWhite") {
-      home.packages = [ deepin.white ];
-    })
-
-    (lib.mkIf (on cfgDD.enable || cfg.pointerCursor == "deepinDark") {
-      home.packages = [ deepin.dark ];
-    })
-
-    (lib.mkIf (on cfgS.enable || cfg.pointerCursor == "sunset") {
-      home.packages = [ sunset.package ];
-    })
-
-    (lib.mkIf (on cfgPO.enable || cfg.pointerCursor == "plasmaOverdose") {
-      home.packages = [ plasmaOverdose.package ];
-    })
-
-    (lib.mkIf (on cfgH.enable || cfg.pointerCursor == "hackneyed") {
-      home.packages = [ hackneyed.packages.${cfgH.variant} ];
-    })
-
-    (lib.mkIf (on cfgXP.enable || cfg.pointerCursor == "xcursorPro") {
-      home.packages = [ xcursorPro.packages.${cfgXP.variant} ];
-    })
-
-    # ── Set home.pointerCursor only when explicitly requested ─────────────────
+    # Set home.pointerCursor only when explicitly requested
     (lib.mkIf (cfg.pointerCursor != null) {
       home.pointerCursor = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
-    })
+      x11.defaultCursor = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
 
-  ];
+      gtk.cursorTheme.name = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
+      gtk.cursorTheme.size = cursorRegistry.${cfg.pointerCursor}.size;
+    })
+    ]
+  );
 }
