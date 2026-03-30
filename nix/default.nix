@@ -328,7 +328,6 @@ in
     # Set home.pointerCursor only when explicitly requested
     (lib.mkIf (cfg.pointerCursor != null) {
       home.pointerCursor = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
-      x11.defaultCursor = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
 
       gtk.cursorTheme.name = cursorRegistry.${cfg.pointerCursor}.pointerCursor;
       gtk.cursorTheme.size = cursorRegistry.${cfg.pointerCursor}.size;
